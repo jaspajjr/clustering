@@ -1,6 +1,5 @@
 from sklearn import datasets
 from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_samples
 
 
 def get_data():
@@ -17,6 +16,7 @@ def get_data():
 class clustering_pipeline(object):
 
     def __init__(self, X, param_dict):
+        self.scoring_log = []
         self.X = X
         self.param_dict = param_dict
         self.fit()
@@ -37,14 +37,19 @@ class clustering_pipeline(object):
         self.km.fit_predict(self.X)
 
     def evaluate_silhouette(self):
+        self.log_params(self.km.inertia_)
         print(self.km.inertia_)
+
+    def log_params(self, inertia):
+        d = {'param_dict': self.param_dict, 'inertia': inertia}
+        self.scoring_log.append((self.param_dict, d))
 
 
 def main():
     X = get_data()
     param_dict = {'n_clusters': 2}
     cm = clustering_pipeline(X, param_dict)  # .foo()
-    print(type(cm.km))
+    print(cm.scoring_log)
 
 
 if __name__ == '__main__':
