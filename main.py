@@ -22,41 +22,44 @@ def convert_dict_to_ordered(dict_to_convert):
     return new_dict
 
 
+def convert_product_to_param_dict(param_tuple):
+    param_dict = {
+        'n_init': param_tuple[0],
+        'n_clusters': param_tuple[1]
+        }
+    return param_dict
+
+
 class clustering_pipeline(object):
 
     def __init__(self, X, param_dict):
         self.scoring_log = []
         self.X = X
         self.param_dict = param_dict
-        # self.fit()
         # self.evaluate_silhouette()
         self.grid_search()
 
-    def get_params(self):
-        n_clusters = self.param_dict.get('n_clusters', 3)
-        return n_clusters
-
-    def fit(self):
-        n_clusters = self.get_params()
-        self.km = KMeans(n_clusters=n_clusters,
-                         init='random',
-                         n_init=10,
-                         max_iter=300,
-                         tol=1e-04,
-                         random_state=0)
-        self.km.fit_predict(self.X)
+    def fit(self, X, param_dict):
+        km = KMeans(n_clusters=param_dict.get('n_clusters'),
+                    init='random',
+                    n_init=param_dict.get('n_init'),
+                    max_iter=300,
+                    tol=1e-04,
+                    random_state=0)
+        km.fit_predict(X)
+        self.evaluate_silhouette(km, param_dict)
 
     def grid_search(self):
         param_dict = convert_dict_to_ordered(self.param_dict)
         for perm in product(*param_dict.itervalues()):
-            print(perm)
+            self.fit(self.X, convert_product_to_param_dict(perm))
 
-    def evaluate_silhouette(self):
-        self.log_params(self.km.inertia_)
+    def evaluate_silhouette(self, km, param_dict):
+        self.log_params(km.inertia_, param_dict)
 
-    def log_params(self, inertia):
-        d = {'param_dict': self.param_dict, 'inertia': inertia}
-        self.scoring_log.append((self.param_dict, d))
+    def log_params(self, inertia, param_dict):
+        d = {'param_dict': param_dict, 'inertia': inertia}
+        self.scoring_log.append(d)
 
 
 def main():
