@@ -1,4 +1,6 @@
 from sklearn import datasets
+from itertools import product
+from collections import OrderedDict
 from sklearn.cluster import KMeans
 
 
@@ -19,8 +21,9 @@ class clustering_pipeline(object):
         self.scoring_log = []
         self.X = X
         self.param_dict = param_dict
-        self.fit()
-        self.evaluate_silhouette()
+        # self.fit()
+        # self.evaluate_silhouette()
+        self.grid_search()
 
     def get_params(self):
         n_clusters = self.param_dict.get('n_clusters', 3)
@@ -36,9 +39,12 @@ class clustering_pipeline(object):
                          random_state=0)
         self.km.fit_predict(self.X)
 
+    def grid_search(self):
+        for perm in product(*self.param_dict.itervalues()):
+            print(perm)
+
     def evaluate_silhouette(self):
         self.log_params(self.km.inertia_)
-        print(self.km.inertia_)
 
     def log_params(self, inertia):
         d = {'param_dict': self.param_dict, 'inertia': inertia}
@@ -47,7 +53,10 @@ class clustering_pipeline(object):
 
 def main():
     X = get_data()
-    param_dict = {'n_clusters': 2}
+    param_dict = {
+            'n_clusters': [2, 3, 4, 5, 6],
+            'n_init': [10, 15, 20, 25, 30]
+            }
     cm = clustering_pipeline(X, param_dict)  # .foo()
     print(cm.scoring_log)
 
