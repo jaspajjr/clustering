@@ -36,8 +36,8 @@ class clustering_pipeline(object):
         self.scoring_log = []
         self.X = X
         self.param_dict = param_dict
-        # self.evaluate_silhouette()
         self.grid_search()
+        self.best_params()
 
     def fit(self, X, param_dict):
         km = KMeans(n_clusters=param_dict.get('n_clusters'),
@@ -61,6 +61,15 @@ class clustering_pipeline(object):
         d = {'param_dict': param_dict, 'inertia': inertia}
         self.scoring_log.append(d)
 
+    def best_params(self):
+        best_value = 1000000
+        best_pair = None
+        for pair in self.scoring_log:
+            if pair['inertia'] < best_value:
+                best_pair = pair
+
+        print(best_pair)
+
 
 def main():
     X = get_data()
@@ -68,8 +77,7 @@ def main():
             'n_clusters': [2, 3, 4, 5, 6],
             'n_init': [10, 15, 20, 25, 30]
             }
-    cm = clustering_pipeline(X, param_dict)  # .foo()
-    print(cm.scoring_log)
+    clustering_pipeline(X, param_dict)
 
 
 if __name__ == '__main__':
