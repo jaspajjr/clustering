@@ -15,6 +15,13 @@ def get_data():
     return X
 
 
+def convert_dict_to_ordered(dict_to_convert):
+    new_dict = OrderedDict()
+    for key, value in dict_to_convert.iteritems():
+        new_dict[key] = value
+    return new_dict
+
+
 class clustering_pipeline(object):
 
     def __init__(self, X, param_dict):
@@ -40,7 +47,8 @@ class clustering_pipeline(object):
         self.km.fit_predict(self.X)
 
     def grid_search(self):
-        for perm in product(*self.param_dict.itervalues()):
+        param_dict = convert_dict_to_ordered(self.param_dict)
+        for perm in product(*param_dict.itervalues()):
             print(perm)
 
     def evaluate_silhouette(self):
